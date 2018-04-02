@@ -1,0 +1,48 @@
+{
+  "name": "cucumber-steps-api",
+  "version": "0.0.1",
+  "description": "Cucumber step library for API testing and support functions",
+  "main": "index.js",
+  "scripts": {
+    "test:bdd": "gulp cucumber",
+    "test": "npm run test:bdd"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/snagi/cucumber-steps-api.git"
+  },
+  "keywords": [
+    "cucumber",
+    "api",
+    "gherkin"
+  ],
+  "author": "Sushil Nagi",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/snagi/cucumber-steps-api/issues"
+  },
+  "homepage": "https://github.com/snagi/cucumber-steps-api#readme",
+  "dependencies": {
+    "chai": "^4.1.2",
+    "chance": "^1.0.13",
+    "cucumber": "^4.1.0",
+    "debug": "^3.1.0",
+    "faker": "^4.1.0",
+    "jsonpath-plus": "^0.16.0",
+    "require-dir": "^1.0.0",
+    "superagent": "^3.8.2",
+    "uuid": "^3.2.1"
+  },
+  "devDependencies": {
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb": "^16.1.0",
+    "eslint-plugin-promise": "^3.7.0",
+    "gulp": "^3.9.1",
+    "gulp-cucumber": "0.0.23",
+    "mkdirp": "^0.5.1",
+    "multiple-cucumber-html-reporter": "^1.8.0",
+    "rimraf": "^2.6.2",
+    "run-sequence": "^2.2.1",
+    "yargs": "^11.0.0"
+  }
+}

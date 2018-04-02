@@ -1,0 +1,21 @@
+{
+  "cucumberautocomplete.steps": [
+    "features/**/*.js",
+    "step-definitions/**/*.js"
+  ],
+  "cucumberautocomplete.syncfeatures": "features/*feature",
+  "cucumberautocomplete.strictGherkinCompletion": true,
+  "cucumberautocomplete.smartSnippets": true,
+  "cucumberautocomplete.stepsInvariants": true,
+  "cucumberautocomplete.customParameters": [
+    {
+      "parameter": "{expression}",
+      "value": "${somevar}"
+    }
+  ],
+  "editor.quickSuggestions": {
+    "comments": false,
+    "strings": true,
+    "other": true
+  }
+}

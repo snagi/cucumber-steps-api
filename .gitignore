@@ -1,3 +1,7 @@
+output
+.vscode/**
+!.vscode/settings.json
+
 # Logs
 logs
 *.log
