@@ -4,8 +4,12 @@
   "description": "Cucumber step library for API testing and support functions",
   "main": "index.js",
   "scripts": {
+    "test:coverage": "NODE_ENV=test nyc --all",
+    "test:unit": "node spec/run.js",
     "test:bdd": "gulp cucumber",
-    "test": "npm run test:bdd"
+    "test:combined": "npm run test:unit && npm run test:bdd",
+    "test": "npm run test:coverage npm run test:combined",
+    "coveralls": "cat coverage/lcov.info | coveralls"
   },
   "repository": {
     "type": "git",
@@ -34,15 +38,51 @@
     "uuid": "^3.2.1"
   },
   "devDependencies": {
+    "babel-plugin-istanbul": "^4.1.5",
+    "babel-register": "^6.26.0",
+    "coveralls": "^3.0.0",
     "eslint": "^4.19.1",
     "eslint-config-airbnb": "^16.1.0",
     "eslint-plugin-promise": "^3.7.0",
     "gulp": "^3.9.1",
     "gulp-cucumber": "0.0.23",
+    "jasmine": "^3.1.0",
+    "jasmine-console-reporter": "^3.0.0",
+    "jasmine-promises": "^0.4.1",
     "mkdirp": "^0.5.1",
     "multiple-cucumber-html-reporter": "^1.8.0",
+    "nyc": "^11.6.0",
     "rimraf": "^2.6.2",
     "run-sequence": "^2.2.1",
     "yargs": "^11.0.0"
+  },
+  "nyc": {
+    "require": [
+      "babel-register"
+    ],
+    "include": [
+      "index.js",
+      "support/**/*.js",
+      "tag-parser.js"
+    ],
+    "exclude": [
+      "step-definitions/**/*.js",
+      "features/**/*.js",
+      "coverage/**"
+    ],
+    "reporter": [
+      "lcov",
+      "text",
+      "json",
+      "text-summary"
+    ],
+    "all": true,
+    "sourceMap": false,
+    "instrument": true,
+    "check-coverage": false,
+    "lines": 90,
+    "statements": 90,
+    "functions": 90,
+    "branches": 90
   }
 }

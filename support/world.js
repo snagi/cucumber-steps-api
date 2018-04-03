@@ -24,10 +24,9 @@ function CustomWorld({ attach, parameters }) {
   this.variableResolver.register('default', Object.assign({}, process.env));
   this.generator = new Generator(Math.floor(Math.random() * 1000000));
 
+  debug('Registering variable resolver using store');
   this.variableResolver.register('store', this.store.resolve.bind(this.store)).alias('s');
 }
-
-setWorldConstructor(CustomWorld);
 
 defineParameterType({
   name: 'expression',
@@ -58,6 +57,22 @@ Before(function (options) {
   this.currentFeatureFilePath = path.resolve(CWD, options.sourceLocation.uri);
   this.currentFeatureFileDir = path.dirname(this.currentFeatureFilePath);
   debug(`Running feature file: ${options.sourceLocation.uri} with current working dir: ${CWD}`);
+
+  debug('Initializing World instance with new instance of agent, store and client');
+  const agent = superagent.agent();
+  this.Store = baseline => new Store(baseline);
+  const store = this.Store();
+  this.store = store;
+  this.HttpClient = another => new HttpClient(another || agent, this.store);
+  this.agent = agent;
+  this.client = this.HttpClient();
+  this.resourceResolver = resource => path.resolve(this.currentFeatureFileDir, resource);
+  this.variableResolver = new VariableResolver();
+  this.variableResolver.register('default', Object.assign({}, process.env));
+  this.generator = new Generator(Math.floor(Math.random() * 1000000));
+
+  debug('Registering variable resolver using store');
+  this.variableResolver.register('store', this.store.resolve.bind(this.store)).alias('s');
 });
 
 After(function (options) {

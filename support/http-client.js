@@ -55,7 +55,7 @@ class RequestDefaults {
             name: key,
             value: headers[key],
           }));
-      list.forEach(header => this.$header(header.name, header.value));
+      list.forEach(header => this.header(header.name, header.value));
     }
     return this;
   }

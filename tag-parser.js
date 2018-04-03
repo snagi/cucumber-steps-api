@@ -32,3 +32,5 @@ module.exports = (tags) => {
 
   return expression;
 };
+
+const t = module.exports(['@test', '~@mock']);
