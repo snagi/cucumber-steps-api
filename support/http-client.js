@@ -27,9 +27,9 @@ class RequestDefaults {
     return this;
   }
 
-  authorization(authorization) {
+  authorization(authorization, type) {
     if (authorization) {
-      this.$authorization = authorization;
+      this.$authorization = type ? `${type}: ${authorization}` : authorization;
     }
     return this;
   }
@@ -74,7 +74,17 @@ class RequestDefaults {
   }
   queries(queries) {
     if (queries && queries.length) {
-      this.$queries = this.$queries.concat(queries);
+      this.$queries = this.$queries.concat(
+        queries.map(query => {
+          if (typeof query === 'object' && Array.isArray(query)) {
+            return [query[0], encodeURIComponent(query[1])].join('=');
+          } else if (typeof query === 'object') {
+            return `${query.name}=${encodeURIComponent(query.value)}`;
+          } else {
+            return query;
+          }
+        })
+      );
     }
     return this;
   }
@@ -261,8 +271,8 @@ class HttpClient {
     this.$request.accept(accept);
     return this;
   }
-  authorization(authorization) {
-    this.$request.authorization(authorization);
+  authorization(authorization, type) {
+    this.$request.authorization(authorization, type);
     return this;
   }
   header(name, value) {
@@ -318,16 +328,21 @@ class HttpClient {
 
     const requestAsCurl = this.request('curl');
     debug(`client{${this.id}} - sending request: ${requestAsCurl}`);
-    self.store.put('last-request', {
-      url: this.$request.$url,
-      method: this.$request.$method,
-      body: this.$request.$body,
-      curl: requestAsCurl,
-    });
+    if (self.store) {
+      self.store.put('last-request', {
+        url: this.$request.$url,
+        method: this.$request.$method,
+        body: this.$request.$body,
+        curl: requestAsCurl,
+      });
+    }
 
     let client = this.agent[this.$request.$method](this.$request.$url);
 
-    if (this.$request.$defaults.$headers && this.$request.$defaults.$headers.length) {
+    if (
+      this.$request.$defaults.$headers &&
+      this.$request.$defaults.$headers.length
+    ) {
       this.$request.$defaults.$headers.forEach(header => {
         client = client.set(header.name, header.value);
       });
@@ -337,8 +352,20 @@ class HttpClient {
         client = client.set(header.name, header.value);
       });
     }
+    if (
+      this.$request.$authorization ||
+      this.$request.$defaults.$authorization
+    ) {
+      client = client.set(
+        'authorization',
+        this.$request.$authorization || this.$request.$defaults.$authorization
+      );
+    }
 
-    if (this.$request.$defaults.$queries && this.$request.$defaults.$queries.length) {
+    if (
+      this.$request.$defaults.$queries &&
+      this.$request.$defaults.$queries.length
+    ) {
       this.$request.$defaults.$queries.forEach(query => {
         client = client.query(query);
       });
@@ -350,7 +377,9 @@ class HttpClient {
     }
 
     if (this.$request.$type) {
-      client = client.type(this.$request.$type || this.$request.$defaults.$type);
+      client = client.type(
+        this.$request.$type || this.$request.$defaults.$type
+      );
     }
     if (this.$request.$accept) {
       client = client.accept(
@@ -364,7 +393,9 @@ class HttpClient {
       client = client.key(this.$request.$key || this.$request.$defaults.$key);
     }
     if (this.$request.$cert) {
-      client = client.cert(this.$request.$cert || this.$request.$defaults.$cert);
+      client = client.cert(
+        this.$request.$cert || this.$request.$defaults.$cert
+      );
     }
     if (this.$request.$ca) {
       client = client.ca(this.$request.$ca || this.$request.$defaults.$ca);
@@ -375,13 +406,18 @@ class HttpClient {
       );
     }
 
-    if (this.$request.$body && !['get', 'head'].includes(this.$request.$method)) {
+    if (
+      this.$request.$body &&
+      !['get', 'head'].includes(this.$request.$method)
+    ) {
       client = client.send(this.$request.$body);
     }
 
     return client.ok(() => true).then(res => {
       self.response = res;
-      self.store.put('last-response', res);
+      if (self.store) {
+        self.store.put('last-response', res);
+      }
       return Promise.resolve(res);
     });
   }

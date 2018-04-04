@@ -17,27 +17,29 @@ class Generator {
     this.guid = uuid.v4;
     this.faker = new Faker({ locales: fakerLocales });
 
-    debug(`generator{${this.id}}: Setting data generator seed to ${seed}`);
-    this.seed = seed;
-    this.seedHash = hashToInteger(seed);
-    this.faker.seed(this.seedHash);
-    this.chance = new Chance(seed);
+    this.$seed = seed || (Math.floor(Math.random() * 10000));
+    debug(`generator{${this.id}}: Setting data generator seed to ${this.$seed}`);
+    
+    this.$seedHash = hashToInteger(this.$seed);
+    this.faker.seed(this.$seedHash);
+    this.chance = new Chance(this.$seed);
 
     generatorCount += 1;
   }
 
   seed(seed) {
+    this.$seed = seed || (Math.floor(Math.random() * 10000));
     debug(`generator{${this.id}}: Setting data generator seed to ${seed}`);
-    this.seed = seed;
-    this.seedHash = hashToInteger(seed);
-    this.faker.seed(this.seedHash);
-    this.chance = new Chance(this.seed);
+
+    this.$seedHash = hashToInteger(this.$seed);
+    this.faker.seed(this.$seedHash);
+    this.chance = new Chance(this.$seed);
   }
 
   reset() {
-    debug(`generator{${this.id}}: Re-setting data generator seed to ${this.seed}`);
-    this.faker.seed(this.seedHash);
-    this.chance = new Chance(this.seed);
+    debug(`generator{${this.id}}: Re-setting data generator seed to ${this.$seed}`);
+    this.faker.seed(this.$seedHash);
+    this.chance = new Chance(this.$seed);
   }
 }
 
