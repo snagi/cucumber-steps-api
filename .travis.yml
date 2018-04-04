@@ -14,4 +14,3 @@ deploy:
     branch: master
     node: "6"
     tags: true
-after_deploy: "git push --tags"
