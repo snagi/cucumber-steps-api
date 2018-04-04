@@ -4,7 +4,14 @@ matrix:
     - node_js: "6"
       script: "npm test"
       after_success: "nyc report --reporter=text-lcov | coveralls"
-    - node_js: "6"
-      script: "yarn test"
     - node_js: "8"
       script: "npm test"
+deploy:
+  provider: npm
+  email: "sushil.nagi@gmail.com"
+  api_key: "$NPM_AUTH_TOKEN"
+  on:
+    branch: master
+    node: "6"
+    tags: true
+after_deploy: "git push --tags"
