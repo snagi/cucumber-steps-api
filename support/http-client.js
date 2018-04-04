@@ -1,3 +1,4 @@
+const superagent = require('superagent');
 const mime = require('./mime');
 const { parse: urlParser } = require('url');
 const debug = require('debug')('cucumber:support:client');
@@ -235,7 +236,7 @@ let clientCount = 0;
 class HttpClient {
   constructor(agent, store) {
     this.id = clientCount;
-    this.agent = agent;
+    this.agent = agent || superagent.agent();
     this.store = store;
 
     this.$defaults = new RequestDefaults({
