@@ -315,8 +315,9 @@ class HttpClient {
     return this;
   }
 
-  send(body, headers, queries) {
+  send(body, headers, queries, type, accept) {
     const self = this;
+    this.$request.type(type).accept(accept);
     if (body) {
       this.$request.body(body);
     }
