@@ -7,9 +7,9 @@
     "test:coverage": "NODE_ENV=test nyc --all",
     "test:unit": "node spec/run.js",
     "test:bdd": "gulp cucumber",
-    "test:combined": "npm run test:unit && npm run test:bdd",
-    "test": "npm run test:coverage npm run test:combined",
-    "coveralls": "cat coverage/lcov.info | coveralls"
+    "test:all": "npm run test:unit && npm run test:bdd",
+    "test": "npm run test:coverage npm run test:all",
+    "coveralls": "nyc report --reporter=text-lcov | coveralls"
   },
   "repository": {
     "type": "git",

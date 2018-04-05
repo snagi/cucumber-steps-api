@@ -3,7 +3,7 @@ matrix:
   include:
     - node_js: "6"
       script: "npm test"
-      after_success: "nyc report --reporter=text-lcov | coveralls"
+      after_success: "npm run coveralls"
     - node_js: "8"
       script: "npm test"
 deploy:

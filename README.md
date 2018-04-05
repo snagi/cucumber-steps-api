@@ -256,8 +256,7 @@ Setting default request options for all subsequent requests -
 const { HttpClient } = require('cucumber-steps-api');
 const client = new HttpClient();
 
-client
-  .defaults()
+client.defaults
   .authorization('AAAAAAAA', 'Digest')
   .authorization('x.y.z', 'Bearer')
   .type('json')

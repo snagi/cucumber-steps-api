@@ -113,6 +113,7 @@ class RequestDefaults {
     if (timeout || timeout === 0) {
       this.$timeout = Number.isNaN(timeout) ? timeout : { deadline: timeout };
     }
+    return this;
   }
 }
 
@@ -239,21 +240,21 @@ class HttpClient {
     this.agent = agent || superagent.agent();
     this.store = store;
 
-    this.$defaults = new RequestDefaults({
+    const defaults = new RequestDefaults({
       type: 'application/json',
     });
     this.$request = new RequestOptions(
       {
         method: 'get',
       },
-      this.$defaults
+      defaults
     );
 
     clientCount += 1;
   }
 
   get defaults() {
-    return this.$defaults;
+    return this.$request.defaults;
   }
 
   url(url) {

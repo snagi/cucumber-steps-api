@@ -24,6 +24,10 @@ class VariableResolver {
   }
 
   register(namespace, resolver) {
+    if (typeof namespace !== 'string') {
+      resolver = namespace;
+      namespace = null;
+    }
     const normalizedNamespace = this.normalizeNamespace(namespace);
 
     if (!resolver) {
