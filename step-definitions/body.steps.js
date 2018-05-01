@@ -40,25 +40,29 @@ defineStep(
   /I set ?(JSON|XML|FormData|json|xml|form|form-data|multipart)? request body from "([^"]+)"(?: file)?$/,
   function(type, filename) {
     expect(this.client, 'client').to.exist;
-    return this.client
-      .type(type)
-      .body(bodyFromFile(this.resourceResolver(filename)));
+    this.client.type(type);
+
+    const body = bodyFromFile(this.resourceResolver(filename));
+    this.attach(typeof body === 'string' ? body : JSON.stringify(body), this.client.$type || 'application/json');
+
+    return this.client.body(body);
   }
 );
 defineStep(
   /I set ?(JSON|XML|FormData|json|xml|form|form-data|multipart)? request body from ?(JS|js)? template content:$/,
   function(type, kind, content) {
     expect(this.client, 'client').to.exist;
-    return this.client
-      .type(type)
-      .body(
-        Template.fromTemplateContent(
-          content,
-          kind || 'js',
-          null,
-          this.generator
-        )
-      );
+    this.client.type(type);
+
+    const body = Template.fromTemplateContent(
+      content,
+      kind || 'js',
+      null,
+      this.generator
+    );
+    this.attach(typeof body === 'string' ? body : JSON.stringify(body), this.client.$type || 'application/json');
+
+    return this.client.body(body);
   }
 );
 defineStep(
@@ -66,15 +70,16 @@ defineStep(
   function(type, filename) {
     expect(this.client, 'client').to.exist;
     debug({ filename, extension });
-    return this.client
-      .type(type)
-      .body(
-        Template.fromTemplateFile(
-          this.resourceResolver(filename),
-          null,
-          this.generator
-        )
-      );
+    this.client.type(type);
+
+    const body = Template.fromTemplateFile(
+      this.resourceResolver(filename),
+      null,
+      this.generator
+    );
+    this.attach(typeof body === 'string' ? body : JSON.stringify(body), this.client.$type || 'application/json');
+
+    return this.client.body(body);
   }
 );
 defineStep(
@@ -82,14 +87,15 @@ defineStep(
   function(type, filename, dataTable) {
     expect(this.client, 'client').to.exist;
     debug({ filename, extension });
-    return this.client
-      .type(type)
-      .body(
-        Template.fromTemplateFile(
-          this.resourceResolver(filename),
-          dataTable.rowsHash(),
-          this.generator
-        )
-      );
+    this.client.type(type);
+
+    const body = Template.fromTemplateFile(
+      this.resourceResolver(filename),
+      dataTable.rowsHash(),
+      this.generator
+    );
+    this.attach(typeof body === 'string' ? body : JSON.stringify(body), this.client.$type || 'application/json');
+
+    return this.client.body(body);
   }
 );

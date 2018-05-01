@@ -256,6 +256,9 @@ class HttpClient {
   get defaults() {
     return this.$request.defaults;
   }
+  get $type() {
+    return this.$request.$type || this.$request.defaults.$type;
+  }
 
   url(url) {
     this.$request.url(url);
