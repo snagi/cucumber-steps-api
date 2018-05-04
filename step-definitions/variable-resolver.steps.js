@@ -20,7 +20,7 @@ Given(/(\w+) variable resolver ?(?:having alias (\w+))? is loaded with:$/, funct
   }
 });
 
-Given(/(\w+) variable resolver ?(?:having alias (\w+))? is loaded with JSON:$/, function (
+Given(/(\w+) variable resolver ?(?:having alias (\w+))? is loaded with JSON ?(?:content)?:$/, function (
   namespace,
   alias,
   content

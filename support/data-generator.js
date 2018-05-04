@@ -11,12 +11,13 @@ function hashToInteger(value) {
 
 let generatorCount = 0;
 class Generator {
-  constructor(seed) {
+  constructor(seed, resolver) {
     this.id = generatorCount;
     this.uuid = uuid;
     this.guid = uuid.v4;
     this.faker = new Faker({ locales: fakerLocales });
 
+    this.$resolver = resolver;
     this.$seed = seed || (Math.floor(Math.random() * 10000));
     debug(`generator{${this.id}}: Setting data generator seed to ${this.$seed}`);
     
@@ -24,7 +25,20 @@ class Generator {
     this.faker.seed(this.$seedHash);
     this.chance = new Chance(this.$seed);
 
+    this.resolve = (str) => {
+      if (this.$resolver) {
+        return this.$resolver.evaluate(str);
+      }
+
+      debug(`generator{${this.id}}: Variable resolver is undefined.`);
+      return str;
+    }
+
     generatorCount += 1;
+  }
+
+  set resolver(resolver) {
+    this.$resolver = resolver;
   }
 
   seed(seed) {

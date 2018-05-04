@@ -3,19 +3,20 @@ const { Given } = require('cucumber');
 const { expect } = require('chai');
 const debug = require('debug')('cucumber:steps');
 
-Given('I request {string} method at {expression} url', function (method, url) {
+Given('reset the client$', function (method, url) {
   this.client = this.HttpClient();
+  return this.client.url(url).method(method);
+});
+Given('I request {string} method at {expression} url', function (method, url) {
   return this.client.url(url).method(method);
 });
 Given(
   /I request (GET|POST|PUT|PATCH|DEL|DELETE|HEAD|OPTIONS|LINK) method at "([^"]+)" url/,
   function (method, url) {
-    this.client = this.HttpClient();
     return this.client.url(url).method(method);
   }
 );
 Given(/(?:\w|\s|[-_])+ is available at "([^"]+)" url/, function (url) {
-  this.client = this.HttpClient();
   return this.client.url(url);
 });
 

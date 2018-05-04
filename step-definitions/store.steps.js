@@ -8,6 +8,11 @@ const debug = require('debug')('cucumber:steps');
 const LAST_REQUEST = 'last-request';
 const LAST_RESPONSE = 'last-response';
 
+defineStep(/I store last request as "([^"]+)"/, function (name) {
+  expect(this.store).to.exist;
+  this.store.put(name, this.store.get(LAST_REQUEST));
+});
+
 defineStep(/I store last response as "([^"]+)"/, function (name) {
   expect(this.store).to.exist;
   this.store.put(name, this.store.get(LAST_RESPONSE));

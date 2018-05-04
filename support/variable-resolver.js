@@ -1,7 +1,10 @@
+const debug = require('debug')('cucumber:support:resolver');
+
 function findFirst(resolvers, key) {
   for (let i = 0; i < resolvers.length; i += 1) {
     const value = resolvers[i](key);
     if (value) {
+      debug(`variable resolver - resolving key: ${key} as: ${JSON.stringify(value)}`);
       return value;
     }
   }
@@ -50,10 +53,30 @@ class VariableResolver {
   }
 
   resolve(key, namespace) {
+    debug(`variable resolver - resolving key: ${key} in ${namespace} namespace`);
     return findFirst(
       (this.resolvers[this.normalizeNamespace(namespace)] || []).reverse(),
       key
     );
+  }
+
+  evaluate(str) {
+    debug(`variable resolver - evaluating expression: ${str}`);
+    return str
+      ? str
+        .split(/((?:\${?(?:(?:\w+?):)?(?:[A-Za-z0-9-_:$.[\]]+))}?)/g)
+        .map((expression) => {
+          const matches =
+              expression &&
+              expression.match(/^["']?(?:\${?(?:(\w+?):)?([A-Za-z0-9-_:$.[\]]+?)}?)["']?$/);
+          if (matches && matches[2]) {
+            const [, namespace, variable] = matches;
+            return this.resolve(variable, namespace) || expression;
+          }
+          return expression;
+        })
+        .join('')
+      : str;
   }
 
   normalizeNamespace(namespace) {

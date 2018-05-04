@@ -11,6 +11,7 @@ const Generator = require('./data-generator');
 function CustomWorld({ attach, parameters }) {
   this.attach = attach;
   this.parameters = parameters;
+
   debug('Initializing World instance with new instance of agent, store and client');
   const agent = superagent.agent();
   this.Store = baseline => new Store(baseline);
@@ -22,7 +23,7 @@ function CustomWorld({ attach, parameters }) {
   this.resourceResolver = resource => path.resolve(this.currentFeatureFileDir, resource);
   this.variableResolver = new VariableResolver();
   this.variableResolver.register('default', Object.assign({}, process.env));
-  this.generator = new Generator(Math.floor(Math.random() * 1000000));
+  this.generator = new Generator(Math.floor(Math.random() * 1000000), this.variableResolver);
 
   debug('Registering variable resolver using store');
   this.variableResolver.register('store', this.store.resolve.bind(this.store)).alias('s');
@@ -33,21 +34,7 @@ defineParameterType({
   regexp: [/[^"]+/, /[^']+/, /.*/, /.+/],
   preferForRegexpMatch: false,
   transformer(str) {
-    return str
-      ? str
-        .split(/((?:\${?(?:(?:\w+?):)?(?:[A-Za-z0-9-_:$.[\]]+))}?)/g)
-        .map((expression) => {
-          const matches =
-              expression &&
-              expression.match(/^["']?(?:\${?(?:(\w+?):)?([A-Za-z0-9-_:$.[\]]+?)}?)["']?$/);
-          if (matches && matches[2]) {
-            const [, namespace, variable] = matches;
-            return this.variableResolver.resolve(variable, namespace) || expression;
-          }
-          return expression;
-        })
-        .join('')
-      : str;
+    return this.variableResolver.evaluate(str);
   },
 });
 
@@ -58,25 +45,11 @@ Before(function (options) {
   this.currentFeatureFileDir = path.dirname(this.currentFeatureFilePath);
   debug(`Running feature file: ${options.sourceLocation.uri} with current working dir: ${CWD}`);
 
-  debug('Initializing World instance with new instance of agent, store and client');
-  const agent = superagent.agent();
-  this.Store = baseline => new Store(baseline);
-  const store = this.Store();
-  this.store = store;
-  this.HttpClient = another => new HttpClient(another || agent, this.store);
-  this.agent = agent;
-  this.client = this.HttpClient();
-  this.resourceResolver = resource => path.resolve(this.currentFeatureFileDir, resource);
-  this.variableResolver = new VariableResolver();
-  this.variableResolver.register('default', Object.assign({}, process.env));
-  this.generator = new Generator(Math.floor(Math.random() * 1000000));
-
-  debug('Registering variable resolver using store');
-  this.variableResolver.register('store', this.store.resolve.bind(this.store)).alias('s');
+  CustomWorld.call(this, this);
 });
 
 After(function (options) {
-  if (options.result.status === 'failed') {
+  if (options.result.status === 'failed' || debug.enabled) {
     this.attach('Store dump:');
     this.attach(JSON.stringify(this.store.dump(), null, 2), 'application/json');
   }

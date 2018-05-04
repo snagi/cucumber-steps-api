@@ -6,24 +6,139 @@ const Template = require('../support/template');
 const debug = require('debug')('cucumber:steps:object-matcher');
 
 function matchRecursive(matcher, data) {
-  return Object.keys(matcher).reduce((matches, key) => {
-    if (!matches || !data[key]) {
+  if (matcher instanceof RegExp) {
+    debug(`Matching ${JSON.stringify(data)} with ${matcher.toString()}`);
+    return []
+      .concat(data)
+      .reduce((matches, value) => matches && matcher.test(value), true);
+  } else if (Array.isArray(matcher)) {
+    const matcherFlags = [];
+    const valueFlags = [];
+    const matchers = [].concat(matcher);
+    const values = [].concat(data);
+
+    if (matchers.length !== values.length) {
       return false;
     }
 
-    if (matcher[key] instanceof RegExp) {
-      return matcher[key].test(data[key]);
-    } else if (typeof matcher[key] === 'object') {
-      return matchRecursive(matcher[key], data[key]);
+    for (let i = 0; i < matchers.length; i++) {
+      for (let j = 0; j < values.length; j++) {
+        if (!matcherFlags[i] || !valueFlags[j]) {
+          const matches = matchRecursive(matchers[i], values[j]);
+          matcherFlags[i] = matcherFlags[i] || matches;
+          valueFlags[j] = valueFlags[j] || matches;
+        }
+      }
     }
-    return matcher[key] === data[key];
-  }, true);
+
+    return (
+      matcherFlags.reduce((last, current) => last && current, true) &&
+      valueFlags.reduce((last, current) => last && current, true)
+    );
+  } else if (typeof matcher === 'object') {
+    return [].concat(data).reduce((matchesItems, item) => {
+      return matchesItems && Object.keys(matcher).reduce((matches, key) => {
+        if (!matches || !item[key]) {
+          return false;
+        }
+        return []
+          .concat(item[key])
+          .reduce(
+            (matchesForKey, value) =>
+              matchesForKey && matchRecursive(matcher[key], value),
+            true
+          );
+      }, true);
+    }, true);
+  }
+  
+  return []
+    .concat(data)
+    .reduce((matches, value) => matches && matcher === value, true);
 }
 
-Given(/expect(?:s)? last response to match with ?(?:\w+)?:$/, function (content) {
-  debug('Matchin last response body');
+Given(/expect(?:s)? "([^"]+)" to ?(not)? match "([^"]+)"$/, function(
+  value,
+  not,
+  expected
+) {
+  debug(`Matching value ${JSON.stringify(value)} with ${JSON.stringify(expected)}`);
+  const match = matchRecursive(expected, value);
+  if (!match) {
+    this.attach(
+      JSON.stringify(value, null, 2), 'application/json'
+    );
+  }
+  expect(not ? !match : match, `value should ${not?'not ':''}match with spec`).to.be.true;
+});
+
+Given(/expect(?:s)? variable "([^"]+)" to ?(not)? match with ?(?:\w+)?:$/, function(
+  variable,
+  not,
+  content
+) {
+  const value = this.variableResolver.resolve(variable);
+  debug(`Matching value ${JSON.stringify(value)} with spec`);
+  const matcher = Template.fromTemplateContent(
+    content,
+    'js',
+    null,
+    this.generator
+  );
+  this.attach(
+    JSON.stringify(matcher, null, 2),
+    'application/json'
+  );
+  const match = matchRecursive(matcher, value);
+  if (!match) {
+    this.attach(
+      JSON.stringify(value, null, 2), 'application/json'
+    );
+  }
+  expect(not ? !match : match, `value ${JSON.stringify(value)} should ${not?'not ':''}match with spec ${matcher}`).to.be.true;
+});
+
+Given(/expect(?:s)? "([^"]+)" to ?(not)? match with ?(?:\w+)?:$/, function(
+  value,
+  not,
+  content
+) {
+  debug(`Matching value ${JSON.stringify(value)} with spec`);
+  const matcher = Template.fromTemplateContent(
+    content,
+    'js',
+    null,
+    this.generator
+  );
+  this.attach(
+    JSON.stringify(matcher, null, 2),
+    'application/json'
+  );
+  const match = matchRecursive(matcher, value);
+  if (!match) {
+    this.attach(
+      JSON.stringify(value, null, 2), 'application/json'
+    );
+  }
+  expect(not ? !match : match, `value ${JSON.stringify(value)} should ${not?'not ':''}match with spec ${matcher}`).to.be.true;
+});
+
+Given(/expect(?:s)? last response to ?(not)? match with ?(?:\w+)?:$/, function(
+  not,
+  content
+) {
+  debug('Matching last response body');
   const lastResponse = this.store.get('last-response');
-  const matcher = Template.fromTemplateContent(content, 'js', null, this.generator);
+  const matcher = Template.fromTemplateContent(
+    content,
+    'js',
+    null,
+    this.generator
+  );
+  this.attach(
+    JSON.stringify(matcher, null, 2),
+    'application/json'
+  );
   const match = matchRecursive(matcher, lastResponse.body);
   if (!match) {
     this.attach(
@@ -31,23 +146,24 @@ Given(/expect(?:s)? last response to match with ?(?:\w+)?:$/, function (content)
       lastResponse.headers['content-type'] || 'application/json'
     );
   }
-  expect(match, 'last response body should match spec').to.be.true;
+  expect(not ? !match : match, `last response body should ${not?'not ':''}match with spec`).to.be.true;
 });
 
-Given(/expect(?:s)? last response to match with "([^"]+)" template$/, function (filename) {
+Given(/expect(?:s)? last response to ?(not)? match with "([^"]+)" template$/, function(
+  not,
+  filename
+) {
   debug('Matchin last response body');
   const lastResponse = this.store.get('last-response');
-  const matcher = Template.fromTemplateFile(this.resourceResolver(filename), null, this.generator);
+  const matcher = Template.fromTemplateFile(
+    this.resourceResolver(filename),
+    null,
+    this.generator
+  );
   const match = matchRecursive(matcher, lastResponse.body);
   if (!match) {
-    this.attach(
-      JSON.stringify(lastResponse.body, null, 2),
-      'application/json'
-    );
-    this.attach(
-      JSON.stringify(matcher, null, 2),
-      'application/json'
-    );
+    this.attach(JSON.stringify(lastResponse.body, null, 2), 'application/json');
+    this.attach(JSON.stringify(matcher, null, 2), 'application/json');
   }
-  expect(match, 'last response body should match spec').to.be.true;
+  expect(not ? !match : match, `last response body should ${not?'not ':''}match with spec`).to.be.true;
 });
