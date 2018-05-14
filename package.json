@@ -1,6 +1,6 @@
 {
   "name": "cucumber-steps-api",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Cucumber step library for API testing and support functions",
   "main": "index.js",
   "scripts": {

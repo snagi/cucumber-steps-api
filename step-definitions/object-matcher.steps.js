@@ -41,13 +41,7 @@ function matchRecursive(matcher, data) {
         if (!matches || !item[key]) {
           return false;
         }
-        return []
-          .concat(item[key])
-          .reduce(
-            (matchesForKey, value) =>
-              matchesForKey && matchRecursive(matcher[key], value),
-            true
-          );
+        return matchRecursive(matcher[key], item[key]);
       }, true);
     }, true);
   }

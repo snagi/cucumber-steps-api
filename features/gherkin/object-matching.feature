@@ -122,6 +122,29 @@ Feature: Using match spec templates for matching objects with expectations
       { "a": /a|b|c/, "b": /b|a/ }
       """
 
+  Scenario: Use inline js template to match objects having array attributes
+    Then I expect variable "objectValue" to match with:
+      """
+      {
+        "name": "some-name",
+        "array": [1, 2, 3]
+      }
+      """
+    And I expect variable "objectValue" to not match with:
+      """
+      {
+        "name": "somename",
+        "array": [1, 2, 3]
+      }
+      """
+    And I expect variable "objectValue" to not match with:
+      """
+      {
+        "name": "some-name",
+        "array": [1, 2, 3, 4]
+      }
+      """
+
   Scenario: Use generator functions in inline js template to POST method to send data to a url
     Given I request POST method at "https://httpbin.org/anything" url
     When I send the request with JSON body from js template content:
