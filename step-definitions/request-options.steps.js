@@ -3,9 +3,8 @@ const { Given } = require('cucumber');
 const { expect } = require('chai');
 const debug = require('debug')('cucumber:steps');
 
-Given('reset the client$', function (method, url) {
+Given(/reset the client$/, function() {
   this.client = this.HttpClient();
-  return this.client.url(url).method(method);
 });
 Given('I request {string} method at {expression} url', function (method, url) {
   return this.client.url(url).method(method);

@@ -17,7 +17,7 @@ function bodyFromFile(filepath) {
 }
 
 defineStep(
-  /I (?:send|(GET|POST|PATCH|PUT|DELETE|DEL|OPTIONS|HEAD|LINK)) ?(?:a|an|the)? ?(JSON|XML|FormData|json|xml|form|form-data|multipart)* request(?: to "([^"]+)")?$/,
+  /I (?:send|(GET|POST|PATCH|PUT|DELETE|DEL|OPTIONS|HEAD|LINK)) ?(?:a|an|the)? ?(JSON|XML|FormData|json|xml|form|form-data|multipart)? request(?: to "([^"]+)")?$/,
   function(method, type, url) {
     expect(this.client).to.exist;
     return this.client
