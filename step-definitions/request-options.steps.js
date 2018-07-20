@@ -30,6 +30,37 @@ Given(/I set headers(?: as):/, function (dataTable) {
   return this.client.headers(dataTable.rowsHash());
 });
 
+Given(/I set a field( as object)? with name "([^"]+)" and value "([^"]+)"/, function (isObject, name, value) {
+  expect(this.client).to.exist;
+  if (isObject) {
+    return this.client.field({ name, value });
+  }
+  return this.client.field(name, value);
+});
+Given(/I set fields(?: as):/, function (dataTable) {
+  expect(dataTable, 'data dataTable').to.exist;
+  expect(dataTable.rows().length > 0, 'data dataTable length > 0').to.be.true;
+  expect(this.client).to.exist;
+  const fields = dataTable.rows().map(row => ({ name: row[0], value: row[1] }));
+  return fields.reduce((client, field) => client.field(field), this.client);
+});
+
+Given(/I set an attachment with name "([^"]+)" and path "([^"]+)"/, function (name, path) {
+  expect(this.client).to.exist;
+  return this.client.attach({ name, path });
+});
+Given(/I set an attachment with name "([^"]+)" and filename "([^"]+)" and buffer "([^"]+)"/, function (name, filename, buffer) {
+  expect(this.client).to.exist;
+  return this.client.attach({ name, filename, buffer: new Buffer(buffer, 'base64') });
+});
+Given(/I set attachments(?: as):/, function (dataTable) {
+  expect(dataTable, 'data dataTable').to.exist;
+  expect(dataTable.rows().length > 0, 'data dataTable length > 0').to.be.true;
+  expect(this.client).to.exist;
+  const attachments = dataTable.rows().map(row => ({ name: row[0], filename: row[1], buffer: new Buffer(row[2], 'base64') }));
+  return attachments.reduce((client, attachment) => client.attach(attachment), this.client);
+});
+
 Given(/I set "([^"]+)" query param as "([^"]+)"/, function (name, value) {
   expect(this.client, 'client').to.exist;
   return this.client.query(`${name}=${encodeURIComponent(value)}`);

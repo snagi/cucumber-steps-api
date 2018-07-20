@@ -53,9 +53,9 @@ class RequestDefaults {
       const list = Array.isArray(headers)
         ? headers
         : Object.keys(headers).map(key => ({
-            name: key,
-            value: headers[key],
-          }));
+          name: key,
+          value: headers[key],
+        }));
       list.forEach(header => this.header(header.name, header.value));
     }
     return this;
@@ -76,7 +76,7 @@ class RequestDefaults {
   queries(queries) {
     if (queries && queries.length) {
       this.$queries = this.$queries.concat(
-        queries.map(query => {
+        queries.map((query) => {
           if (typeof query === 'object' && Array.isArray(query)) {
             return [query[0], encodeURIComponent(query[1])].join('=');
           } else if (typeof query === 'object') {
@@ -125,6 +125,8 @@ class RequestOptions extends RequestDefaults {
     this.$method = options.method;
     this.$url = options.url;
     this.$defaults = defaults || GlobalRequestDefaults;
+    this.$fields = [];
+    this.$attachments = [];
   }
 
   get defaults() {
@@ -157,6 +159,20 @@ class RequestOptions extends RequestDefaults {
   body(body) {
     if (body) {
       this.$body = body;
+    }
+    return this;
+  }
+
+  field(field) {
+    if (field) {
+      this.$fields.push(field);
+    }
+    return this;
+  }
+
+  attach(attachment) {
+    if (attachment) {
+      this.$attachments.push(attachment);
     }
     return this;
   }
@@ -222,7 +238,7 @@ class RequestOptions extends RequestDefaults {
             `-d ${
               typeof this.$body === 'object'
                 ? JSON.stringify(this.$body)
-                : this.$body.toString()
+                : this.$body && this.$body.toString()
             }`
           );
         }
@@ -296,12 +312,22 @@ class HttpClient {
     this.$request.queries(queries);
     return this;
   }
-
   body(body) {
     this.$request.body(body);
     return this;
   }
-
+  field(name, value) {
+    if (typeof name === 'object') {
+      this.$request.field(name);
+    } else {
+      this.$request.field({ name, value });
+    }
+    return this;
+  }
+  attach(attachment) {
+    this.$request.attach(attachment);
+    return this;
+  }
   key(key) {
     this.$request.key(key);
     return this;
@@ -349,12 +375,12 @@ class HttpClient {
       this.$request.$defaults.$headers &&
       this.$request.$defaults.$headers.length
     ) {
-      this.$request.$defaults.$headers.forEach(header => {
+      this.$request.$defaults.$headers.forEach((header) => {
         client = client.set(header.name, header.value);
       });
     }
     if (this.$request.$headers && this.$request.$headers.length) {
-      this.$request.$headers.forEach(header => {
+      this.$request.$headers.forEach((header) => {
         client = client.set(header.name, header.value);
       });
     }
@@ -372,12 +398,12 @@ class HttpClient {
       this.$request.$defaults.$queries &&
       this.$request.$defaults.$queries.length
     ) {
-      this.$request.$defaults.$queries.forEach(query => {
+      this.$request.$defaults.$queries.forEach((query) => {
         client = client.query(query);
       });
     }
     if (this.$request.$queries && this.$request.$queries.length) {
-      this.$request.$queries.forEach(query => {
+      this.$request.$queries.forEach((query) => {
         client = client.query(query);
       });
     }
@@ -413,13 +439,38 @@ class HttpClient {
     }
 
     if (
+      this.$request.$attachments &&
+      this.$request.$attachments.length &&
+      ['post', 'put', 'patch'].includes(this.$request.$method)
+    ) {
+      this.$request.$attachments.forEach((attachment) => {
+        if (attachment.path) {
+          client = client.attach(attachment.name, attachment.path);
+        } else {
+          client = client.attach(attachment.name, attachment.buffer, attachment.filename);
+        }
+      });
+    }
+
+    if (
+      this.$request.$fields &&
+      this.$request.$fields.length &&
+      ['post', 'put', 'patch'].includes(this.$request.$method)
+    ) {
+      this.$request.$fields.forEach((field) => {
+        client = client.field(field.name, field.value);
+      });
+    }
+
+    if (
       this.$request.$body &&
-      !['get', 'head'].includes(this.$request.$method)
+      !['get', 'head'].includes(this.$request.$method) &&
+      (this.$request.$fields.length === 0 || this.$request.$attachments.length === 0)
     ) {
       client = client.send(this.$request.$body);
     }
 
-    return client.ok(() => true).then(res => {
+    return client.ok(() => true).then((res) => {
       self.response = res;
       if (self.store) {
         self.store.put('last-response', res);
