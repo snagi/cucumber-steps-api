@@ -65,7 +65,7 @@ Feature: Set request options
 
   Scenario: Attach an XML file using utf-8 encoding
     Given I request POST method at "https://httpbin.org/anything" url
-      And I add an attachment with name "myxml" and filename as "test.xml" with encoding "utf-8" using content:
+      And I add an attachment with name "myxml" and filename as "test.xml" with "utf-8" encoding using content:
       """
       <?xml version="1.0" encoding="UTF-8"?>
       <note>
