@@ -54,7 +54,7 @@ Given(/I add an attachment with name "([^"]+)" and|having filename(?: as)? "([^"
   expect(this.client).to.exist;
   return this.client.attach({ name, filename, buffer: new Buffer(data, isBase64 ? 'base64' : 'utf8') });
 });
-Given(/I add an attachment with name "([^"]+)" and|having filename(?: as)? "([^"]+)" using "([^"]+)"(?: with "([^"]+)" encoding)?/, function (name, filename, buffer, encoding) {
+Given(/I add an attachment with name "([^"]+)" and|having filename(?: as)? "([^"]+)" using "([^"]+)" buffer(?: with "([^"]+)" encoding)?/, function (name, filename, buffer, encoding) {
   expect(this.client).to.exist;
   return this.client.attach({ name, filename, buffer: new Buffer(buffer, encoding || 'base64') });
 });
