@@ -42,7 +42,7 @@ Given(/I set fields(?: as):/, function (dataTable) {
   expect(dataTable, 'data dataTable').to.exist;
   expect(dataTable.rows().length > 0, 'data dataTable length > 0').to.be.true;
   expect(this.client).to.exist;
-  const fields = dataTable.rows().map(row => ({ name: row[0], value: row[1] }));
+  const fields = dataTable.raw().map(row => ({ name: row[0], value: row[1] }));
   return fields.forEach(field => this.client.field(field));
 });
 
