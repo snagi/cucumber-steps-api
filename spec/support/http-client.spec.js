@@ -155,6 +155,111 @@ describe('Http Client', () => {
       });
   });
 
+  it('should support sending field with name and value in request', () => {
+    const client = new Client(agent);
+    return client
+      .url('https://httpbin.org/anything')
+      .method('post')
+      .field('field-name', 'field-value')
+      .send()
+      .then(response => {
+        expect(response.status).toBe(200);
+      })
+      .catch(err => {
+        expect(err).toBeFalsy();
+      });
+  });
+
+  it('should support sending field as an object in request', () => {
+    const client = new Client(agent);
+    return client
+      .url('https://httpbin.org/anything')
+      .method('post')
+      .field({ name: 'field-name', value: 'field-value' })
+      .send()
+      .then(response => {
+        expect(response.status).toBe(200);
+      })
+      .catch(err => {
+        expect(err).toBeFalsy();
+      });
+  });
+
+  it('should support sending multiple fields in request', () => {
+    const client = new Client(agent);
+    return client
+      .url('https://httpbin.org/anything')
+      .method('post')
+      .field({ name: 'field1', value: 'value1' })
+      .field({ name: 'field2', value: 'value2' })
+      .send()
+      .then(response => {
+        expect(response.status).toBe(200);
+      })
+      .catch(err => {
+        expect(err).toBeFalsy();
+      });
+  });
+
+  it('should support sending an attachment as { name, path } in request', () => {
+    const client = new Client(agent);
+    return client
+      .url('https://httpbin.org/anything')
+      .method('post')
+      .attach({
+        name: 'photo',
+        path: './resources/blank.jpg'
+      })
+      .send()
+      .then(response => {
+        expect(response.status).toBe(200);
+      })
+      .catch(err => {
+        expect(err).toBeFalsy();
+      });
+  });
+
+  it('should support sending an attachment as { name, filename, buffer } in request', () => {
+    const client = new Client(agent);
+    const base64Image = '/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD3+iiigD//2Q==';
+    const buffer = new Buffer(base64Image, 'base64');
+    return client
+      .url('https://httpbin.org/anything')
+      .method('post')
+      .attach({
+        name: 'photo',
+        filename: 'photo.jpg',
+        buffer,
+      })
+      .send()
+      .then(response => {
+        expect(response.status).toBe(200);
+      })
+      .catch(err => {
+        expect(err).toBeFalsy();
+      });
+  });
+
+  it('should support sending multiple attachments in request', () => {
+    const client = new Client(agent);
+    const buffers = [
+      new Buffer('R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=', 'base64'),
+      new Buffer('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7', 'base64'),
+    ];
+    return client
+      .url('https://httpbin.org/anything')
+      .method('post')
+      .attach({ name: 'image1', filename: 'black.gif', buffer: buffers[0] })
+      .attach({ name: 'image2', filename: 'transparent.gif', buffer: buffers[1] })
+      .send()
+      .then(response => {
+        expect(response.status).toBe(200);
+      })
+      .catch(err => {
+        expect(err).toBeFalsy();
+      });
+  });
+
   it('should support sending accept type using header in request', () => {
     const client = new Client(agent);
     return client
