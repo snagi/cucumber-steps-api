@@ -39,43 +39,42 @@ Feature: Set request options
 
   Scenario: Set a form field
     Given I request POST method at "https://httpbin.org/anything" url
-      And I set a field with name "field1" and value "value1"
-     When I send the request
-     Then I expect last response to have status as "200"
-
-  Scenario: Set a form field as object
-    Given I request POST method at "https://httpbin.org/anything" url
-      And I set a field as object with name "field1" and value "value1"
+      And I set "field1" field with value "value1"
      When I send the request
      Then I expect last response to have status as "200"
 
   Scenario: Set multiple form fields using data table
     Given I request POST method at "https://httpbin.org/anything" url
       And I set fields as:
-        | name    | value |
         | field1  | value1 |
         | field2  | value2 |
      When I send the request
      Then I expect last response to have status as "200"
 
-  Scenario: Set a file attachment as using local image
+  Scenario: Attach a file using local image
     Given I request POST method at "https://httpbin.org/anything" url
-      And I set an attachment with name "photo" and path "./resources/blank.jpg"
+      And I attach a file at "./resources/blank.jpg" path with name "photo"
      When I send the request
      Then I expect last response to have status as "200"
 
-  Scenario: Set a file attachment as using base64 image
+  Scenario: Attach an image file using base64
     Given I request POST method at "https://httpbin.org/anything" url
-      And I set an attachment with name "image" and filename "pixel.gif" and buffer "data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs="
+      And I add an attachment with name "image" and filename as "pixel.gif" with "R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=" base64 data
      When I send the request
      Then I expect last response to have status as "200"
 
-  Scenario: Set multiple file attachments using data table
+  Scenario: Attach an XML file using utf-8 encoding
     Given I request POST method at "https://httpbin.org/anything" url
-      And I set attachments as:
-        | name   | filename         | buffer |
-        | image1 | black.gif        | data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs= |
-        | image2 | transparent.gif  | data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7 |
+      And I add an attachment with name "myxml" and filename as "test.xml" with encoding "utf-8" using content:
+      """
+      <?xml version="1.0" encoding="UTF-8"?>
+      <note>
+        <to>Someone</to>
+        <from>Me</from>
+        <heading>Test Message</heading>
+        <body>This is a test message!</body>
+      </note>
+      """
      When I send the request
      Then I expect last response to have status as "200"
 
